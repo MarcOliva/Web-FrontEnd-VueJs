@@ -34,10 +34,6 @@ export default {
   data() {
     return {
       pedidos: [],
-      nombreHabitacion: "",
-      numCamas: [1, 2, 3, 4],
-      cantidadCamas: "",
-      habitaciones: [],
       dialog: false,
       headers: [
         { text: "Reserva", value: "reservaid", sortable: false },

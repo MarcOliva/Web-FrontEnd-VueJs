@@ -3,11 +3,11 @@
     <v-btn slot="activator" color="primary" dark class="mb-2">Nuevo Pedido</v-btn>
     <v-stepper v-model="e1">
       <v-stepper-header>
-        <v-stepper-step :complete="e1 > 1" step="1">Selecciona la reserva</v-stepper-step>
+        <v-stepper-step :complete="e1 > 0" step="1">Selecciona la reserva</v-stepper-step>
 
         <v-divider></v-divider>
 
-        <v-stepper-step :complete="e1 > 2" step="2">Elige un producto</v-stepper-step>
+        <v-stepper-step :complete="e1 > 1" step="2">Elige un producto</v-stepper-step>
       </v-stepper-header>
 
       <v-stepper-items>
@@ -34,12 +34,15 @@
                           <td class="justify-center layout px-0">
                             <v-icon small class="mr-2" @click="seleccionarReserva(props.item)">add</v-icon>
                           </td>
-                          <td>{{props.item.id }}</td>
-                          <td>{{props.item.name }}</td>
-                          <td>{{props.item.price}}</td>
+                          <td>{{ props.item.nombre }}</td>
+                          <td>{{ props.item.apellidoPa }}</td>
+                          <td>{{ props.item.apellidoMa }}</td>
+                          <td>{{ props.item.habitacion_id }}</td>
+                          <td>{{ props.item.fecha_inicio }}</td>
+                          <td>{{ props.item.fecha_fin }}</td>
                         </template>
                         <template slot="no-data">
-                          <h3>No hay productos para mostrar.</h3>
+                          <h3>No hay reservas para mostrar.</h3>
                         </template>
                       </v-data-table>
                     </template>
@@ -49,7 +52,7 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn @click="close()" color="blue darken" flat>Cancelar</v-btn>
+              <v-btn @click="close" color="primary" flat>Cancelar</v-btn>
               <v-btn @click="e1=2" color="primary" flat>Continuar</v-btn>
             </v-card-actions>
           </v-card>
@@ -81,12 +84,10 @@
                           <td class="justify-center layout px-0">
                             <v-icon small class="mr-2" @click="agregarDetalle(props.item)">add</v-icon>
                           </td>
-                          <td>{{ props.item.nombre }}</td>
-                          <td>{{ props.item.apellidoPa }}</td>
-                          <td>{{ props.item.apellidoMa }}</td>
-                          <td>{{ props.item.habitacion_id }}</td>
-                          <td>{{ props.item.fecha_inicio }}</td>
-                          <td>{{ props.item.fecha_fin }}</td>
+                          <td>{{ props.item.nombreProd }}</td>
+                          <td>{{ props.item.precioProd }}</td>
+                          <td>{{ props.item.categoriaId }}</td>
+                          <td>{{ props.item.descripcion }}</td>
                         </template>
                         <template slot="no-data">
                           <h3>No hay productos para mostrar.</h3>
@@ -99,8 +100,8 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn @click="close()" color="blue darken" flat>Cancelar</v-btn>
-              <v-btn @click="e1=2" color="primary" flat>Continuar</v-btn>
+              <v-btn @click="close" color="blue darken" flat>Cancelar</v-btn>
+              <v-btn @click="registrarPedido" color="primary" flat>Guardar</v-btn>
             </v-card-actions>
           </v-card>
         </v-stepper-content>
@@ -113,6 +114,8 @@ import axios from "axios";
 export default {
   data() {
     return {
+      e1: 0,
+      dialog: false,
       alert: false,
       selectReserva: null,
       texto: "",
@@ -127,16 +130,23 @@ export default {
       ],
       headersReserva: [
         { text: "Nombre", value: "nombre", sortable: false },
-        { text: "A. Paterno", value: "lastname", sortable: false },
-        { text: "A. Materno", value: "department" },
-        { text: "Habitacion", value: "salary" },
-        { text: "F. Inicio", value: "department" },
-        { text: "F. Fin", value: "department" }
+        { text: "A. Paterno", value: "apellidoPa", sortable: false },
+        { text: "A. Materno", value: "apellidoMa" },
+        { text: "Habitacion", value: "habitacion" },
+        { text: "F. Inicio", value: "fecha_inicio" },
+        { text: "F. Fin", value: "fecha_fin" }
       ],
 
-      e1: 0,
-      dialog: false,
       detallePedido: [],
+      //Model Cliente
+      nombre: "",
+      apellidoPa: "",
+      apellidoMa: "",
+      phone: "",
+      fecha_nac: "",
+      tipo_doc: "",
+      num_doc: "",
+      pais: "",
       //Model Reserva
       fecha_inicio: "",
       fecha_fin: "",
@@ -153,7 +163,7 @@ export default {
 
       //Modelo Producto
       productoId: "",
-      nombre: "",
+      nombreProd: "",
       descripcion: "",
       precioProd: "",
       categoriaId: "",
@@ -184,14 +194,16 @@ export default {
     agregarProducto(data = []) {
       //la data es el producto a agregar
       console.log(data);
-      this.encuentra(data["id"]);
-
-      this.detallePedido.push({
-        productoId: data["producto_id"],
-        cantidad: 1,
-        precio: data["precio"] * this.cantidad,
-        descuento: data["descuento"]
-      });
+      if (this.encuentra(data["id"])) {
+        //producto actualizado
+      } else {
+        this.detallePedido.push({
+          productoId: data["producto_id"],
+          cantidad: 1,
+          precio: data["precio"] * this.cantidad,
+          descuento: data["descuento"]
+        });
+      }
     },
     encuentra(id) {
       var sw = 0;
@@ -227,7 +239,9 @@ export default {
             fecharegistro: me.fecha_registro
           })
           .then(response => {})
-          .catch(error => {});
+          .catch(error => {
+            console.log(error);
+          });
       } else {
         //Muestra alerta
       }
