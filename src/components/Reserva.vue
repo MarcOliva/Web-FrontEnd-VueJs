@@ -19,10 +19,12 @@
           <td class="justify-center layout px-0">
             <v-icon small class="mr-2" @click="editItem(props.item)">edit</v-icon>
           </td>
-          <td>{{ props.item.name }}</td>
-          <td>{{ props.item.lastname }}</td>
-          <td>{{ props.item.departament }}</td>
-          <td>{{ props.item.salary }}</td>
+          <td>{{ props.item.nombre }}</td>
+          <td>{{ props.item.apellidoPa }}</td>
+          <td>{{ props.item.apellidoMa }}</td>
+          <td>{{ props.item.habitacion_id }}</td>
+          <td>{{ props.item.fecha_inicio }}</td>
+          <td>{{ props.item.fecha_fin }}</td>
         </template>
         <template slot="no-data">
           <v-btn color="primary" @click="listarReservas">Resetear</v-btn>
@@ -43,23 +45,36 @@ export default {
       dialog: false,
       headers: [
         { text: "Nombre", value: "nombre", sortable: false },
-        { text: "A. Paterno", value: "lastname", sortable: false },
-        { text: "A. Materno", value: "department" },
-        { text: "Habitacion", value: "salary" },
-        { text: "F. Inicio", value: "department" },
-        { text: "F. Fin", value: "department" }
+        { text: "A. Paterno", value: "apellidoPa", sortable: false },
+        { text: "A. Materno", value: "apellidoMa" },
+        { text: "Habitacion", value: "habitacion" },
+        { text: "F. Inicio", value: "fecha_inicio" },
+        { text: "F. Fin", value: "fecha_fin" }
       ],
 
       alert: false,
       search: null,
       editedIndex: -1,
 
-      //Model
-      id: "",
-      name: "",
-      lastname: "",
-      departament: "",
-      salary: ""
+      //Model Reserva
+      fecha_inicio: "",
+      fecha_fin: "",
+      fecha_registro: this.formatDate(new Date().toISOString().substr(0, 10)), // se genera
+      cliente_id: "",
+      comentario: "",
+      habitacion_id: "",
+      monto: "",
+      anulado: false,
+
+      //Model Cliente
+      nombre: "",
+      apellidoPa: "",
+      apellidoMa: "",
+      phone: "",
+      fecha_nac: "",
+      tipo_doc: "",
+      num_doc: "",
+      pais: ""
     };
   },
   computed: {
@@ -95,44 +110,14 @@ export default {
           console.log(error);
         });
     },
-
-    editItem(item) {
-      this.id = item.id;
-      this.name = item.name;
-      this.lastname = item.lastname;
-      this.departament = item.departament;
-      this.salary = item.salary;
-
-      this.editedIndex = 1;
-      this.dialog = true;
-    },
-
     close() {
       this.dialog = false;
     },
-    limpiar() {
-      this.id = "";
-      this.name = "";
-      this.lastname = "";
-      this.departament = "";
-      this.salary = "";
-    },
-    editar() {
-      let me = this;
-      axios
-        .put("api/reserva", {
-          id: me.id,
-          name: me.name,
-          lastname: me.lastname,
-          departament: me.departament,
-          salary: me.salary
-        })
-        .then(function(response) {
-          me.listarReservas();
-        })
-        .catch(function(error) {
-          console.log(error);
-        });
+    formatDate(date) {
+      if (!date) return null;
+
+      const [year, month, day] = date.split("-");
+      return `${month}/${day}/${year}`;
     }
   }
 };
